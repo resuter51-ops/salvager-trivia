@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SALVAGER TRIVIA</title>
+  <style>
+    /* Dark Noir Aesthetic Theme */
+    body {
+      background-color: #05050a;
+      color: #e2e2eb;
+      font-family: "Georgia", "Times New Roman", Times, serif;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    .game-container {
+      background-color: #0d0d16;
+      border: 1px solid #ffaa00;
+      border-radius: 4px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 170, 0, 0.15);
+      max-width: 600px;
+      width: 100%;
+      padding: 40px;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    /* Outer/Inner design borders */
+    .game-container::before {
+      content: "";
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      right: 6px;
+      bottom: 6px;
+      border: 1px solid rgba(255, 170, 0, 0.15);
+      pointer-events: none;
+    }
+
+    /* Text branding */
+    h1.gold-title {
+      color: #ffaa00;
+      text-align: center;
+      font-size: 2.25rem;
+      letter-spacing: 0.18em;
+      margin-top: 0;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(255, 170, 0, 0.25);
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #a0a0b0;
+      font-size: 0.9rem;
+      font-style: italic;
+      margin-bottom: 25px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* Gritty Noir Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px 0;
+      color: #ffaa00;
+    }
+    .divider::before, .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(255, 170, 0, 0.4), transparent);
+    }
+    .divider span {
+      padding: 0 15px;
+      font-size: 0.8rem;
+    }
+
+    /* Screens setup */
+    .screen {
+      display: none;
+    }
+    .screen.active {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    /* Welcome page */
+    .intro-text {
+      line-height: 1.7;
+      color: #c0c0d0;
+      font-size: 1.05rem;
+      margin-bottom: 35px;
+      text-align: center;
+      font-style: italic;
+    }
+
+    /* Progress bar */
+    .progress-container {
+      margin-bottom: 30px;
+    }
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      color: #a0a0b0;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .progress-bar-bg {
+      width: 100%;
+      height: 5px;
+      background-color: #12121f;
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 170, 0, 0.15);
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background-color: #ffaa00;
+      width: 0%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 8px rgba(255, 170, 0, 0.5);
+    }
+
+    /* Question and Answer structures */
+    .question-container {
+      margin-bottom: 25px;
+    }
+    .question-text {
+      font-size: 1.35rem;
+      line-height: 1.5;
+      color: #ffffff;
+      border-left: 3px solid #ffaa00;
+      padding-left: 15px;
+      margin: 0;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .option-btn {
+      background-color: #12121f;
+      border: 1px solid rgba(255, 170, 0, 0.25);
+      border-radius: 4px;
+      color: #e2e2eb;
+      padding: 14px 18px;
+      font-size: 1rem;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      outline: none;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    .option-btn:hover {
+      background-color: #171729;
+      border-color: #ffaa00;
+      box-shadow: 0 0 10px rgba(255, 170, 0, 0.1);
+    }
+    .option-btn .btn-index {
+      color: #ffaa00;
+      font-weight: bold;
+      margin-right: 12px;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255, 170, 0, 0.3);
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .option-btn:hover .btn-index {
+      border-color: #ffaa00;
+    }
+
+    /* Feedback selections */
+    .option-btn.correct {
+      background-color: #0b2616 !important;
+      border-color: #12aa50 !important;
+      color: #34d399 !important;
+      box-shadow: 0 0 12px rgba(18, 170, 80, 0.25);
+    }
+    .option-btn.correct .btn-index {
+      border-color: #12aa50 !important;
+      color: #34d399 !important;
+      background-color: rgba(18, 170, 80, 0.1);
+    }
+
+    .option-btn.incorrect {
+      background-color: #2b0d0d !important;
+      border-color: #ef4444 !important;
+      color: #fca5a5 !important;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+    }
+    .option-btn.incorrect .btn-index {
+      border-color: #ef4444 !important;
+      color: #fca5a5 !important;
+      background-color: rgba(239, 68, 68, 0.1);
+    }
+
+    .option-btn.disabled {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    .option-btn.correct.disabled, .option-btn.incorrect.disabled {
+      opacity: 1; /* Keep selected answers clear and opaque */
+    }
+
+    /* Feedback Section */
+    .feedback-box {
+      background-color: #12121f;
+      border: 1px solid rgba(255, 170, 0, 0.15);
+      border-radius: 4px;
+      padding: 18px;
+      margin-bottom: 25px;
+      animation: fadeIn 0.4s ease;
+    }
+    .feedback-header {
+      font-size: 1.15rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .feedback-header.correct-text {
+      color: #34d399;
+    }
+    .feedback-header.incorrect-text {
+      color: #fca5a5;
+    }
+    .feedback-text {
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: #a0a0b0;
+      margin: 0;
+    }
+
+    /* Primary and Secondary Actions */
+    .btn-primary {
+      background-color: #ffaa00;
+      color: #05050a;
+      border: none;
+      border-radius: 4px;
+      padding: 14px 28px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      width: 100%;
+      display: block;
+      text-align: center;
+      box-sizing: border-box;
+      outline: none;
+    }
+    .btn-primary:hover {
+      background-color: #e09600;
+      box-shadow: 0 0 15px rgba(255, 170, 0, 0.4);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid #ffaa00;
+      color: #ffaa00;
+      border-radius: 4px;
+      padding: 14px 28px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      width: 100%;
+      display: block;
+      text-align: center;
+      box-sizing: border-box;
+      outline: none;
+    }
+    .btn-secondary:hover {
+      background-color: rgba(255, 170, 0, 0.08);
+      box-shadow: 0 0 10px rgba(255, 170, 0, 0.2);
+    }
+
+    /* Scoreboard Screen */
+    .score-circle-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+    .score-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #ffaa00;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #12121f;
+      box-shadow: 0 0 20px rgba(255, 170, 0, 0.15);
+    }
+    .score-num {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #ffffff;
+    }
+    .score-total {
+      font-size: 0.9rem;
+      color: #a0a0b0;
+    }
+    .rating-title {
+      font-size: 1.8rem;
+      color: #ffaa00;
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 12px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .rating-desc {
+      text-align: center;
+      color: #c0c0d0;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 35px;
+      font-style: italic;
+    }
+
+    /* Animation effects */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Media Responsive Layout adjustments */
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      .game-container {
+        padding: 25px 20px;
+      }
+      h1.gold-title {
+        font-size: 1.8rem;
+      }
+      .question-text {
+        font-size: 1.15rem;
+      }
+      .option-btn {
+        padding: 12px 14px;
+        font-size: 0.95rem;
+      }
+      .rating-title {
+        font-size: 1.45rem;
+      }
+      .btn-primary, .btn-secondary {
+        padding: 12px 20px;
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    <h1 class="gold-title">SALVAGER TRIVIA</h1>
+    <div class="subtitle">Bob's Salvager Book Universe</div>
+    
+    <!-- welcome screen -->
+    <div id="start-screen" class="screen active">
+      <div class="divider"><span>CASE BRIEFING</span></div>
+      <p class="intro-text">
+        Welcome to the rain-slicked, shadow-filled streets of Bob's Salvager book series. Here, mystery, conspiracies, and high-stakes thriller action collide. How deep does your knowledge of the dead zones, Facility 7, and Room 412 go? Put your detective skills to the test over 10 challenging trivia questions.
+      </p>
+      <button class="btn-primary" onclick="startGame()">Begin Case</button>
+    </div>
+
+    <!-- quiz screen -->
+    <div id="quiz-screen" class="screen">
+      <div class="progress-container">
+        <div class="progress-text">
+          <span id="progress-question-num">Question 1 of 10</span>
+          <span id="current-score-text">Score: 0</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="progress-bar" class="progress-bar-fill"></div>
+        </div>
+      </div>
+
+      <div class="question-container">
+        <h3 id="question-text" class="question-text">Question content goes here?</h3>
+      </div>
+
+      <div id="options-grid" class="options-grid">
+        <!-- Javascript injected option buttons -->
+      </div>
+
+      <div id="feedback-box" class="feedback-box" style="display: none;">
+        <div id="feedback-header" class="feedback-header">Status</div>
+        <p id="feedback-text" class="feedback-text">Brief lore background goes here.</p>
+      </div>
+
+      <button id="next-btn" class="btn-primary" onclick="nextQuestion()" style="display: none;">Next Clue</button>
+    </div>
+
+    <!-- end screen -->
+    <div id="end-screen" class="screen">
+      <div class="divider"><span>CASE RESOLUTION</span></div>
+      
+      <div class="score-circle-container">
+        <div class="score-circle">
+          <span id="final-score" class="score-num">0</span>
+          <span class="score-total">/ 10</span>
+        </div>
+      </div>
+
+      <h2 id="rating-title" class="rating-title">Rating</h2>
+      <p id="rating-desc" class="rating-desc">Detailed assessment description.</p>
+      
+      <button class="btn-secondary" onclick="startGame()">Reopen Case (Play Again)</button>
+    </div>
+  </div>
+
+  <script>
+    // Self-contained quiz data
+    const questions = [
+      {
+        question: "Who are the two main characters in The Salvager?",
+        options: [
+          "John and Sarah",
+          "Zeke and Maya",
+          "Caleb and Lilith",
+          "Arthur and Beatrice"
+        ],
+        answer: 1, // index of Zeke and Maya
+        context: "Zeke and Maya are the primary protagonists prowling the dark, rainy streets in The Salvager."
+      },
+      {
+        question: "What room are they racing to?",
+        options: [
+          "Room 101",
+          "Room 412",
+          "Room 237",
+          "Room 777"
+        ],
+        answer: 1, // index of Room 412
+        context: "The protagonists are desperately racing to Room 412 as the mystery unfolds."
+      },
+      {
+        question: "What is The Prospector searching for in the dead zones?",
+        options: [
+          "The compound",
+          "Lost gold",
+          "Water source",
+          "Alien artifact"
+        ],
+        answer: 0, // index of The compound
+        context: "In the desolate dead zones, The Prospector searches tirelessly for the compound."
+      },
+      {
+        question: "What is the name of Facility 7's purpose?",
+        options: [
+          "Agricultural development",
+          "Deep-space communication",
+          "Research/military",
+          "Crypto mining"
+        ],
+        answer: 2, // index of Research/military
+        context: "Facility 7 is cloaked in secrecy, serving a highly classified research/military purpose."
+      },
+      {
+        question: "In The Network, what does the protagonist discover?",
+        options: [
+          "A treasure map",
+          "A vast conspiracy/network",
+          "A secret passage",
+          "A long-lost sibling"
+        ],
+        answer: 1, // index of A vast conspiracy/network
+        context: "The protagonist of The Network uncovers a vast conspiracy/network pulling the strings from the shadows."
+      },
+      {
+        question: "In The Runaway Daughter, who is running?",
+        options: [
+          "A young girl fleeing danger",
+          "A mechanical dog",
+          "A rogue cyborg",
+          "An escaped scientist"
+        ],
+        answer: 0, // index of A young girl fleeing danger
+        context: "The story follows a young girl fleeing danger through a hostile and tense landscape."
+      },
+      {
+        question: "In The Sister's Plea, what does the sister ask for?",
+        options: [
+          "A loan of one thousand credits",
+          "Revenge on a crime lord",
+          "Help finding/reaching someone",
+          "A safe passage off-world"
+        ],
+        answer: 2, // index of Help finding/reaching someone
+        context: "The emotional core of the narrative centers on a desperate sister pleading for help finding/reaching someone."
+      },
+      {
+        question: "What genre best describes The Salvager series?",
+        options: [
+          "Hard science fiction",
+          "Noir action thriller",
+          "Romantic comedy",
+          "Epic fantasy"
+        ],
+        answer: 1, // index of Noir action thriller
+        context: "The Salvager series is a quintessential noir action thriller filled with rain, shadows, and gritty suspense."
+      },
+      {
+        question: "Where do Zeke and Maya prowl?",
+        options: [
+          "Rainy streets",
+          "Sandy deserts",
+          "High-tech skyscrapers",
+          "Lush alien jungles"
+        ],
+        answer: 0, // index of Rainy streets
+        context: "Zeke and Maya are classic noir figures, prowling the slick, rain-soaked city streets."
+      },
+      {
+        question: "What is the Amulet of Salvation from Dungeon Quest referencing?",
+        options: [
+          "A literal magical item",
+          "The book series' salvation theme",
+          "A developer's private joke",
+          "An ancient historical relic"
+        ],
+        answer: 1, // index of The book series' salvation theme
+        context: "The Amulet of Salvation acts as an elegant meta-reference to the broader book series' theme of salvation."
+      }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let questionAnswered = false;
+
+    function startGame() {
+      currentQuestionIndex = 0;
+      score = 0;
+      questionAnswered = false;
+      
+      showScreen("quiz-screen");
+      loadQuestion();
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll(".screen").forEach(screen => {
+        screen.classList.remove("active");
+      });
+      document.getElementById(screenId).classList.add("active");
+    }
+
+    function loadQuestion() {
+      questionAnswered = false;
+      const currentQuestion = questions[currentQuestionIndex];
+      
+      // Update progress bar & text
+      const progressPercent = (currentQuestionIndex / questions.length) * 100;
+      document.getElementById("progress-bar").style.width = `${progressPercent}%`;
+      document.getElementById("progress-question-num").innerText = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+      document.getElementById("current-score-text").innerText = `Score: ${score}`;
+
+      // Update question text
+      document.getElementById("question-text").innerText = currentQuestion.question;
+
+      // Populate options
+      const optionsGrid = document.getElementById("options-grid");
+      optionsGrid.innerHTML = "";
+
+      const optionLabels = ["A", "B", "C", "D"];
+      currentQuestion.options.forEach((option, index) => {
+        const button = document.createElement("button");
+        button.className = "option-btn";
+        button.onclick = () => selectOption(index);
+        
+        button.innerHTML = `
+          <span class="btn-index">${optionLabels[index]}</span>
+          <span class="btn-text">${escapeHtml(option)}</span>
+        `;
+        optionsGrid.appendChild(button);
+      });
+
+      // Reset feedback and Next button
+      document.getElementById("feedback-box").style.display = "none";
+      document.getElementById("next-btn").style.display = "none";
+    }
+
+    function selectOption(selectedIndex) {
+      if (questionAnswered) return;
+      questionAnswered = true;
+
+      const currentQuestion = questions[currentQuestionIndex];
+      const correctIndex = currentQuestion.answer;
+      const optionsGrid = document.getElementById("options-grid");
+      const buttons = optionsGrid.querySelectorAll(".option-btn");
+
+      // Check answer
+      const isCorrect = selectedIndex === correctIndex;
+      if (isCorrect) {
+        score++;
+        document.getElementById("current-score-text").innerText = `Score: ${score}`;
+      }
+
+      // Apply styling to options
+      buttons.forEach((button, index) => {
+        button.classList.add("disabled");
+        if (index === correctIndex) {
+          button.classList.add("correct");
+        } else if (index === selectedIndex) {
+          button.classList.add("incorrect");
+        }
+      });
+
+      // Show feedback
+      const feedbackBox = document.getElementById("feedback-box");
+      const feedbackHeader = document.getElementById("feedback-header");
+      const feedbackText = document.getElementById("feedback-text");
+
+      if (isCorrect) {
+        feedbackHeader.innerText = "✓ Correct Case Detail";
+        feedbackHeader.className = "feedback-header correct-text";
+      } else {
+        feedbackHeader.innerText = "✗ Cold Lead";
+        feedbackHeader.className = "feedback-header incorrect-text";
+      }
+
+      feedbackText.innerText = currentQuestion.context;
+      feedbackBox.style.display = "block";
+
+      // Show Next button
+      const nextBtn = document.getElementById("next-btn");
+      if (currentQuestionIndex === questions.length - 1) {
+        nextBtn.innerText = "Complete Case File";
+      } else {
+        nextBtn.innerText = "Next Clue";
+      }
+      nextBtn.style.display = "block";
+    }
+
+    function nextQuestion() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        loadQuestion();
+      } else {
+        endGame();
+      }
+    }
+
+    function endGame() {
+      // Update progress bar to full at the end
+      document.getElementById("progress-bar").style.width = "100%";
+      
+      showScreen("end-screen");
+      document.getElementById("final-score").innerText = score;
+
+      const ratingTitle = document.getElementById("rating-title");
+      const ratingDesc = document.getElementById("rating-desc");
+
+      // Custom ratings based on achievements
+      if (score === 10) {
+        ratingTitle.innerText = "Salvager Legend!";
+        ratingDesc.innerText = "Incredible! You know Bob's universe inside out. Every rain-slicked alley, deep conspiracy, and dark room is perfectly etched in your detective notes.";
+      } else if (score >= 8) {
+        ratingTitle.innerText = "Salvager Expert!";
+        ratingDesc.innerText = "Outstanding work! Zeke and Maya would gladly trust you to cover their backs. You've thoroughly read the cases and solved the core mysteries.";
+      } else if (score >= 6) {
+        ratingTitle.innerText = "Experienced Detective";
+        ratingDesc.innerText = "A solid performance. You have a firm grasp of the dead zones and major plot lines, but a few deeper secrets remain hidden from you.";
+      } else if (score >= 4) {
+        ratingTitle.innerText = "Novice Reader";
+        ratingDesc.innerText = "You're starting to find your footing in Room 412, but there are plenty of details you missed in the shadows. Time to reread the files.";
+      } else {
+        ratingTitle.innerText = "Clueless Wanderer";
+        ratingDesc.innerText = "You got completely lost in the dead zones. The dark forces of the network outsmarted you. Time to crack open the books and search for the compound!";
+      }
+    }
+
+    // Simple utility to escape HTML characters
+    function escapeHtml(text) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+  </script>
+</body>
+</html>
